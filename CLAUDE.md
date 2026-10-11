@@ -25,7 +25,7 @@ These are non-negotiable. If a task seems to need breaking one, stop and tell me
 
 ## Repo layout
 
-Target layout (being introduced in S00; until the restructure lands, the Vue app is still at the repo root):
+Layout (introduced in S00; the Vue app, its Cloud Function and the Firebase config all live under `app/`):
 
 ```
 fpl-assist/
@@ -45,7 +45,7 @@ fpl-assist/
 └── .github/workflows/
 ```
 
-When moving the app into `app/`, check `firebase.json`, `.firebaserc`, CI paths, Vite config and import paths so the Firebase build and deploy keep working.
+`firebase.json`, `.firebaserc` and `functions/` sit inside `app/`, so run Firebase CLI commands from `app/`. Paths in those files are relative and did not change in the move.
 
 ## Data layer conventions
 
@@ -87,17 +87,24 @@ When moving the app into `app/`, check `firebase.json`, `.firebaserc`, CI paths,
 
 ## Commands
 
-Frontend (from `app/` once restructured):
+Frontend (from `app/`):
 
 ```bash
 npm run dev -- --host
+npm run typecheck
+npm run build
+npm --prefix functions run build
 firebase emulators:start --only functions,hosting
 ```
+
+CI (`.github/workflows/app.yml`) runs typecheck and both builds for changes under `app/`. Function lint (`npm --prefix functions run lint`) is not in CI yet: the generated Google ESLint config conflicts with the Prettier convention and needs reconciling.
 
 Data layer commands will be added here as each layer is built (`terraform -chdir=infra/envs/dev plan`, `func start` in `pipeline/`, `dbt build` in `transform/`, and so on). Keep this section current.
 
 ## Open decisions
 
-- Azure region for the free SQL databases and other resources
-- Resource naming convention
-- How much historical data the Draft API returns for past seasons (if current season only, start capturing now)
+None currently.
+
+Resolved: Azure region is UK South (`uksouth`), and resource names follow CAF style `{type}-fplassist-{env}-uks` (storage: `stfplassist{env}uks`). See `docs/adr/ADR-005-region-and-naming.md`.
+
+Resolved: Draft API history (checked 2026-10-11, see README changelog). Every past gameweek of the current season can be fetched again (`event/{n}/live`, `event/{n}/fixtures`, `entry/{id}/event/{n}`, `entry/{id}/history`, `element-summary/{id}`, `draft/league/{id}/transactions`), so backfill covers GW1 onwards. Previous seasons are not available (`season` query parameters are ignored). Point-in-time state is not stored historically and only exists once the poller captures it: player news/status/availability in `bootstrap-static`, `league/{id}/element-status` ownership between gameweeks, and the order events happened during live matches. `draft/{id}/choices` returns no draft picks for this league.
