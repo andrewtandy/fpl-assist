@@ -21,7 +21,10 @@ In progress as a data engineering portfolio piece. Python Azure Functions poll t
 
 ## Running locally
 
+Everything app-related lives in `app/`, so run these from there:
+
 ```bash
+cd app
 npm install
 npm --prefix functions install
 
@@ -31,7 +34,7 @@ firebase emulators:start --only functions,hosting  # local proxy function
 
 Other scripts: `npm run build`, `npm run typecheck`, `npm run preview`.
 
-The app reads the league ID from `VITE_LEAGUE_ID`. Set it in a `.env.local` file at the repo root, which git ignores:
+The app reads the league ID from `VITE_LEAGUE_ID`. Set it in `app/.env.local`, which git ignores:
 
 ```bash
 VITE_LEAGUE_ID=12345
@@ -52,6 +55,31 @@ Entry template:
 ```
 
 ---
+
+### 2026-10-11: S00 restructure into a monorepo layout
+
+**Changed:**
+- Moved the Vue app, its Cloud Function and the Firebase config into `app/`.
+- Added empty `infra/`, `pipeline/`, `transform/`, `docs/adr/` and `docs/sprints/` folders, each with a short README.
+- Added a GitHub Actions workflow (`app.yml`) that typechecks and builds the frontend and the function on PRs and pushes to `main`.
+- Upgraded `vue-tsc` from 1.8 to 2.x.
+- Deleted the template `HelloWorld.vue` and the unused `functions/.env`.
+
+**Why:**
+- **Layout:** each layer of the data platform gets its own top-level folder, so CI can trigger on the paths that changed and the app stays deployable on its own. `firebase.json` moved with the app because all its paths (`dist`, `functions`) are relative to it, so nothing inside it needed editing.
+- **vue-tsc:** `npm run typecheck` had been crashing since TypeScript 5.9 was installed, because vue-tsc 1.8 can't patch it. CI needs a working typecheck to be a useful gate.
+
+**Decisions recorded:** ADR-000 (why Azure), ADR-001 (raw lands in Blob before SQL), and ADR-005 (UK South region, CAF-style names such as `rg-fplassist-dev-uks`). Region and naming came first because neither can be changed without recreating resources.
+
+**Draft API history check:** before restructuring, I probed the API to see whether waiting to build the poller would lose data.
+- Every past gameweek of the current season can be fetched again: live points, picks, fixtures, per-player history and waiver transactions. Backfill from GW1 will work.
+- Previous seasons are not available.
+- What is lost until the poller runs: point-in-time state such as player news and injury status, ownership between gameweeks, and the order events happen during live matches.
+- These matter for later insights, not core data, so no stopgap capture is needed.
+
+**Next / open:**
+- Function lint fails against the generated Google ESLint config, which conflicts with Prettier. Reconcile it, then add lint to CI.
+- Turn on branch protection for `main` requiring the `app` check.
 
 ### 2026-10-11: Repository set up and README rewritten
 

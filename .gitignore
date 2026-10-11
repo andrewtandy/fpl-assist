@@ -30,7 +30,7 @@ dist-ssr/
 # --- Firebase ---
 .firebase/
 .runtimeconfig.json
-functions/lib/
+app/functions/lib/
 
 # --- Python (pipeline/) ---
 __pycache__/
