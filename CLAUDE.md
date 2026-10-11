@@ -93,11 +93,12 @@ Frontend (from `app/`):
 npm run dev -- --host
 npm run typecheck
 npm run build
+npm --prefix functions run lint
 npm --prefix functions run build
 firebase emulators:start --only functions,hosting
 ```
 
-CI (`.github/workflows/app.yml`) runs typecheck and both builds for changes under `app/`. Function lint (`npm --prefix functions run lint`) is not in CI yet: the generated Google ESLint config conflicts with the Prettier convention and needs reconciling.
+CI (`.github/workflows/app.yml`) runs frontend typecheck and build plus function lint and build on every PR and push to `main`. It has no path filter on purpose: its `build` job is a required status check on `main`, and a run skipped by a path filter never reports, which blocks the merge. Function ESLint extends `eslint-config-prettier`, so ESLint checks code quality and Prettier owns formatting.
 
 Data layer commands will be added here as each layer is built (`terraform -chdir=infra/envs/dev plan`, `func start` in `pipeline/`, `dbt build` in `transform/`, and so on). Keep this section current.
 

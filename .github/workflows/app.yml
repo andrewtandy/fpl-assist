@@ -1,18 +1,18 @@
 name: app
 
+# Runs on every PR (no path filter) because `build` is a required status check:
+# a filtered-out run never reports, which would block merging docs-only PRs.
 on:
   pull_request:
-    paths:
-      - "app/**"
-      - ".github/workflows/app.yml"
   push:
     branches: [main]
-    paths:
-      - "app/**"
-      - ".github/workflows/app.yml"
 
 permissions:
   contents: read
+
+concurrency:
+  group: app-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -42,6 +42,10 @@ jobs:
 
       - name: Install function dependencies
         run: npm ci
+        working-directory: app/functions
+
+      - name: Lint function
+        run: npm run lint
         working-directory: app/functions
 
       - name: Build function
