@@ -1,0 +1,38 @@
+name: Sprint ticket
+description: One unit of planned work from the project plan
+labels: []
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What this ticket delivers and why. Link the sprint section in docs/project-plan.md.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Observable outcomes that mean this ticket is done.
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Layer
+      description: Also apply the matching label.
+      options:
+        - infra
+        - pipeline
+        - transform
+        - serve
+        - docs
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Cost or credential implications, hard-to-reverse decisions (does it need an ADR?), links.

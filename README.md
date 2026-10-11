@@ -11,13 +11,42 @@ A mobile-first dashboard for a Fantasy Premier League **Draft** league. It shows
 
 ## How it works
 
-- **Frontend:** Vue 3, TypeScript, Pinia and Vite. All data derivation happens in the Pinia store (`src/stores/fpl.ts`), with helpers in `src/lib/`, so components only display data.
+- **Frontend:** Vue 3, TypeScript, Pinia and Vite. All data derivation happens in the Pinia store (`app/src/stores/fpl.ts`), with helpers in `app/src/lib/`, so components only display data.
 - **Hosting:** Firebase Hosting.
-- **API proxy:** a Cloud Function (`fplProxy`, in `functions/`) forwards `/api/*` to the FPL Draft API and `/api/classic/*` to the classic FPL API. It adds a short in-memory cache, which avoids CORS issues and reduces load on the upstream APIs.
+- **API proxy:** a Cloud Function (`fplProxy`, in `app/functions/`) forwards `/api/*` to the FPL Draft API and `/api/classic/*` to the classic FPL API. It adds a short in-memory cache, which avoids CORS issues and reduces load on the upstream APIs.
 
 ## Planned: Azure data layer
 
-In progress as a data engineering portfolio piece. Python Azure Functions poll the Draft API and land raw JSON in Blob Storage. A batch loader moves it into Azure SQL, and dbt builds staging and mart models. A new Insights tab will read those models. Infrastructure is Terraform, deployed by GitHub Actions using OIDC, with no long-lived secrets and free tiers only. See [CLAUDE.md](CLAUDE.md) for the full conventions.
+In progress as a data engineering portfolio piece. Python Azure Functions poll the Draft API and land raw JSON in Blob Storage. A batch loader moves it into Azure SQL, and dbt builds staging and mart models. A new Insights tab will read those models. Infrastructure is Terraform, deployed by GitHub Actions using OIDC, with no long-lived secrets and free tiers only.
+
+- **Plan:** [docs/project-plan.md](docs/project-plan.md) covers milestones, sprints S00–S11, and risks.
+- **Conventions:** [CLAUDE.md](CLAUDE.md).
+- **Decisions:** [docs/adr/](docs/adr/).
+
+## Architecture
+
+_Placeholder: an architecture diagram replaces this section in S11._
+
+```text
+FPL Draft API ──> Azure Functions poller ──> Blob Storage (raw JSON, immutable)
+                                                  │
+                                       batch loader (MERGE, load log)
+                                                  ▼
+                              Azure SQL: raw ──dbt──> staging ──> marts ──> serve views
+                                                                               │
+                         Firebase function (workload identity federation) <────┘
+                                                  │
+                                       Vue app: Insights tab
+```
+
+## Sprint log
+
+| Sprint | Goal | Notes |
+| --- | --- | --- |
+| S00 – Repo and account setup | The repo looks like a real project before any Azure resource exists | [S00.md](docs/sprints/S00.md) |
+| S01 – Infrastructure as code | `terraform apply` creates the whole dev environment from nothing | Not started |
+
+Later sprints are listed in the [project plan](docs/project-plan.md). Each gets a row here when it closes.
 
 ## Running locally
 
@@ -55,6 +84,27 @@ Entry template:
 ```
 
 ---
+
+### 2026-10-11: S00 closed
+
+**Changed:**
+- Wrote the S00 sprint note ([docs/sprints/S00.md](docs/sprints/S00.md)), comparing every S00 ticket with the plan.
+- Added the plan itself as [docs/project-plan.md](docs/project-plan.md).
+- Enabled the `main` ruleset: PR required (squash only, 0 approvals), `build` check required with the branch up to date, linear history, and no force pushes or deletions.
+- Set up the [Project board](https://github.com/users/andrewtandy/projects/1) (Backlog, Sprint, In progress, Review, Done), layer labels, milestones S00–S11, and issues for every S00 and S01 ticket.
+- Added issue templates (sprint ticket, bug) and a PR template carrying the definition of done.
+- Added an architecture placeholder and a sprint log to this README.
+
+**Why:**
+- **Ruleset:** makes the trunk-based workflow enforced rather than voluntary. Zero approvals because GitHub doesn't let you approve your own PR, so the passing CI check is the real gate.
+- **Board, milestones, templates:** the plan asks for the project to be run like a small team's, with the work visible.
+- **Plan comparison:** it showed the board and README tickets were incomplete even though S00 felt finished, so it was worth doing before closing the sprint.
+- **Setup script:** I scripted the GitHub setup (`gh` plus one GraphQL call to replace the board's default Status options) and dry-ran it before creating anything.
+
+**Next / open:**
+- Configure Prettier and add a format check to CI (#14).
+- Consider importing the hand-made Azure budget into Terraform in S01.
+- Start S01 (Terraform state bootstrap, GitHub-to-Azure OIDC). This needs an Azure subscription with the free SQL offer.
 
 ### 2026-10-11: Function lint in CI and branch protection prep
 
