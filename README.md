@@ -56,6 +56,19 @@ Entry template:
 
 ---
 
+### 2026-10-11: S00 closed
+
+**Changed:**
+- Wrote the S00 sprint note ([docs/sprints/S00.md](docs/sprints/S00.md)).
+- Enabled the `main` ruleset: PR required (squash only, 0 approvals), `build` check required with the branch up to date, linear history, and no force pushes or deletions.
+
+**Why:** the ruleset makes the trunk-based workflow enforced rather than voluntary. Zero approvals because GitHub doesn't let you approve your own PR, so the passing CI check is the real gate. This PR is the first to go through the ruleset.
+
+**Next / open:**
+- Configure Prettier and add a format check to CI.
+- Compare S00 against the plan's tickets.
+- Start S01 (Terraform state bootstrap, GitHub-to-Azure OIDC). This needs an Azure subscription with the free SQL offer.
+
 ### 2026-10-11: Function lint in CI and branch protection prep
 
 **Changed:**
