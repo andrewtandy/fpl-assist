@@ -1,0 +1,93 @@
+# --- Secrets and local env (never commit) ---
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.pfx
+*.p12
+
+# --- Logs and crash dumps ---
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+firebase-debug.log*
+firebase-debug.*.log*
+ui-debug.log*
+*.stackdump
+
+# --- Node / Vite ---
+node_modules/
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# --- Firebase ---
+.firebase/
+.runtimeconfig.json
+functions/lib/
+
+# --- Python (pipeline/) ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Azure Functions (pipeline/) ---
+local.settings.json
+.python_packages/
+__azurite_db*__.json
+__blobstorage__/
+__queuestorage__/
+
+# --- Terraform (infra/) ---
+# Keep .terraform.lock.hcl tracked so provider versions are pinned.
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+!*.example.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# --- dbt (transform/) ---
+transform/target/
+transform/dbt_packages/
+transform/logs/
+transform/.user.yml
+
+# --- Editor and OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- Local AI tooling ---
+.agents/
+.claude/
+skills-lock.json
