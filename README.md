@@ -85,6 +85,27 @@ Entry template:
 
 ---
 
+### 2026-10-19: Terraform state storage bootstrapped (S01, #9)
+
+**Changed:**
+- Added `infra/bootstrap/bootstrap-tfstate.ps1` and ran it against the `FPL-Assist` subscription. It created `rg-fplassist-tfstate-uks` (with a delete lock), the `stfplassisttfstate` storage account (shared key access disabled, versioning and 30-day soft delete on) and a `tfstate` container.
+- Added `docs/manual-setup.md`, which lists everything created by hand: the subscription, the budget and this bootstrap.
+
+**Why:**
+- **A script for this one step:** Terraform can't create the storage that holds its own state, so this is the single sanctioned manual step. It's scripted so it can be repeated, and documented so it isn't tribal knowledge.
+- **Shared key disabled:** the account has keys, but Azure rejects them. Verified: a key-authenticated request fails with "Key based authentication is not permitted". Terraform and CI reach state through Entra ID only (`use_azuread_auth = true`), so there is no secret to leak.
+- **Versioning, soft delete and the lock:** losing or corrupting state is the most painful failure in a Terraform setup, and these make it recoverable.
+- **Cost:** under £0.01 a month.
+
+**Lessons from running it:**
+- **MFA:** Azure requires MFA for any change made from the CLI, not just in the portal. The first run failed until two-step verification was on.
+- **Windows command quoting:** `az` on Windows is a batch file, so unquoted parentheses in a `--query` argument break `cmd` parsing. The script now avoids them.
+- **Stderr warnings:** with stderr redirected, Windows PowerShell 5.1 turns `az` warnings into errors. The script now judges success by exit code.
+
+**Next / open:**
+- #10 Terraform modules, then #11 environment roots, which point their backend at this account.
+- S02: grant the GitHub OIDC identity `Storage Blob Data Contributor` on the state account.
+
 ### 2026-10-11: S00 closed
 
 **Changed:**
