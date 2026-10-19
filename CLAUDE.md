@@ -100,6 +100,13 @@ firebase emulators:start --only functions,hosting
 
 CI (`.github/workflows/app.yml`) runs frontend typecheck and build plus function lint and build on every PR and push to `main`. It has no path filter on purpose: its `build` job is a required status check on `main`, and a run skipped by a path filter never reports, which blocks the merge. Function ESLint extends `eslint-config-prettier`, so ESLint checks code quality and Prettier owns formatting.
 
+Terraform state bootstrap (a one-off, but safe to re-run). Everything created by hand is listed in `docs/manual-setup.md`:
+
+```powershell
+az login
+./infra/bootstrap/bootstrap-tfstate.ps1 -SubscriptionId <FPL-Assist subscription id>
+```
+
 Data layer commands will be added here as each layer is built (`terraform -chdir=infra/envs/dev plan`, `func start` in `pipeline/`, `dbt build` in `transform/`, and so on). Keep this section current.
 
 ## Open decisions
